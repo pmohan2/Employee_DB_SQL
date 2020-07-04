@@ -1,6 +1,5 @@
 ## CSE 560 Data Models and Query Language
 ### Company DB - SQL Query
----
 
 ## 1 Project Setup
 
@@ -26,70 +25,42 @@ Follow the steps below to install the project database
     `mysql -u YOURMYSQLUSERNAME -p < testemployeesmd5.sql`
 
 
-## 2 Problem Statements
-
-For each problem, write a SQL query to find the information described in the
-statements. Only following MySQL functions are allowed during constructing
-SQL Queries:
-
-- AVG
-- COUNT
-- DATEDIFF
-- MIN
-- YEAR
-
-Answer Format: Each problem can only have ONE SQL query. The query
-can be arbitrary complex, such as nested query etc. Write the query in a file with
-letter q followed by the problem number and .sql extension. e.g., the answer
-query for problem 1 is written in q1.sql as file name.
-
-### 2.1 Problem 1, 1 point
+### Problem 1
 
 Find all employees’ employee number, birth date, gender. Sort the result by
-employee number. The result of query is similar to following table:
+employee number. 
 
-emp_no birth_date gender
-10001 1953-09-02 M
-10002 1964-06-02 F
-10003 1959-12-03 M
-...
+#### Query
+`SELECT emp_no, birth_date, gender FROM employees ORDER BY emp_no;`
 
-### 2.2 Problem 2, 1 point
+### Problem 2
 
-Find all female employees and sort the result by employee number. The result
-of query is similar to following table:
+Find all female employees and sort the result by employee number.
 
-emp_no birth_date first_name last_name gender hire_date
-10002 1964-06-02 Bezalel Simmel F 1985-11-
-10006 1953-04-20 Anneke Preusig F 1989-06-
-...
+#### Query
+`SELECT * FROM employees WHERE gender = 'F' ORDER BY emp_no;`
 
-### 2.3 Problem 3, 1 point
+### Problem 3
 
 Find all employees’ last name with their salaries in different periods. Sort the
-result by last name, salary, fromdate, then todate. The result of query is
-similar to following table:
+result by last name, salary, fromdate, then todate.
 
+#### Query
+`SELECT employees.last_name, salaries.salary, salaries.from_date, salaries.to_date 
+FROM employees INNER JOIN salaries ON employees.emp_no = salaries.emp_no
+ORDER BY last_name, salary, from_date, to_date;`
 
-last_name salary from_date to_date
-Aamodt 39537 1991-05-28 1992-05-
-Aamodt 39548 1986-12-31 1987-12-
-...
-Acton 39202 1994-10-10 1995-10-
-Acton 39581 1993-10-10 1994-10-
-...
-
-### 2.4 Problem 4, 1 point
+### Problem 4
 
 Find all employees’ current department and the start date with their employee
-number and sort the result by employee number. The result of query is similar
-to following table:
+number and sort the result by employee number.
 
-emp_no dept_name from_date
-10001 Development 1986-06-
-10002 Sale 1996-08-
-10003 Production 1995-12-
-...
+#### Query
+`SELECT employees.emp_no, departments.dept_name, dept_emp.from_date FROM employees 
+INNER JOIN dept_emp ON employees.emp_no = dept_emp.emp_no
+INNER JOIN departments ON dept_emp.dept_no = departments.dept_no
+WHERE YEAR(dept_emp.to_date) = 9999
+ORDER BY emp_no;`
 
 ### 2.5 Problem 5, 1 point
 
