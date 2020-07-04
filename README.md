@@ -46,9 +46,11 @@ Find all employees’ last name with their salaries in different periods. Sort t
 result by last name, salary, fromdate, then todate.
 
 #### Query
-`SELECT employees.last_name, salaries.salary, salaries.from_date, salaries.to_date
+```
+SELECT employees.last_name, salaries.salary, salaries.from_date, salaries.to_date
 FROM employees INNER JOIN salaries ON employees.emp_no = salaries.emp_no
-ORDER BY last_name, salary, from_date, to_date;`
+ORDER BY last_name, salary, from_date, to_date;
+```
 
 ### Problem 4
 
@@ -70,10 +72,11 @@ List the number of employees in each department. Sort the result by department
 name.
 
 #### Query
-`SELECT departments.dept_name, COUNT(departments.dept_name) as noe FROM dept_emp
+```
+SELECT departments.dept_name, COUNT(departments.dept_name) as noe FROM dept_emp
 INNER JOIN departments ON dept_emp.dept_no = departments.dept_no
-GROUP BY dept_name
-ORDER BY dept_name;`
+GROUP BY dept_name ORDER BY dept_name;
+```
 
 ### Problem 6
 
@@ -86,65 +89,77 @@ List pairs of employee (e1 , e2 ) which satisfies ALL following conditions:
 Sort the result by e1 then e2.
 
 #### Query
-``
+```
+SELECT a.emp_no AS e1, b.emp_no AS e2 FROM 
+(SELECT employees.emp_no FROM employees
+INNER JOIN dept_emp ON employees.emp_no = dept_emp.emp_no
+AND dept_emp.dept_no = 'd001'
+AND YEAR(birth_date) = 1955
+AND YEAR(to_date) = 9999) a
+INNER JOIN 
+(SELECT employees.emp_no FROM employees
+INNER JOIN dept_emp ON employees.emp_no = dept_emp.emp_no
+AND dept_emp.dept_no = 'd001' AND YEAR(birth_date) = 1955 AND YEAR(to_date) = 9999) b 
+ON a.emp_no < b.emp_no ORDER BY  a.emp_no, b.emp_no;
+```
 
-### 2.7 Problem 7, 2 points
+### Problem 7
 
 For each department, list out the manager who stayed the longest time in the
 department. The list needs to exclude the current manager. Sort the result by
-employ number. The result of query is similar to following table:
+employ number.
 
-emp_no dept_name
-110022 Marketing
-110085 Finance
-...
+#### Query
+```
+WITH table1 AS 
+(SELECT titles.emp_no, departments.dept_name, DATEDIFF(titles.to_date, titles.from_date) AS duration FROM titles 
+INNER JOIN dept_emp ON titles.emp_no = dept_emp.emp_no
+INNER JOIN departments ON dept_emp.dept_no = departments.dept_no
+WHERE title = 'Manager' AND YEAR(titles.to_date) != 9999 order by departments.dept_name)
+SELECT a.emp_no, a.dept_name FROM table1 a LEFT JOIN table1 b ON a.dept_name = b.dept_name and a.duration < b.duration
+WHERE b.duration IS NULL ORDER BY a.emp_no;
+```
 
-### 2.8 Problem 8, 2 points
+### Problem 8
 
 Find out departments which has changed its manager more than once then list
 out the name of the departments and the number of changes. Sort the result
-by department name. The result of query is similar to following table:
+by department name.
 
-dept_name cnt
-Customer Service 3
-...
+#### Query
+```
+SELECT departments.dept_name, COUNT(dept_manager.dept_no)-1 AS cnt FROM dept_manager
+INNER JOIN departments ON dept_manager.dept_no = departments.dept_no GROUP BY dept_manager.dept_no
+HAVING COUNT(dept_manager.dept_no)-1 > 1
+ORDER BY departments.dept_name;
+```
 
-### 2.9 Problem 9, 2 points
+### Problem 9
 
 For each employee, find out how many times the title has been changed without
 chaning of the salary. e.g. An employee promoted from Engineer to Sr. Engineer
-with salaries remains 10k. Sort the result by employ number. The result of query
-is similar to following table:
+with salaries remains 10k. Sort the result by employ number.
 
-emp_no cnt
-10004 1
-10005 1
-10007 1
-10009 2
-...
+#### Query 
+```
+SELECT titles.emp_no, COUNT(titles.emp_no) AS cnt FROM titles 
+LEFT JOIN salaries ON titles.emp_no = salaries.emp_no AND titles.from_date = salaries.from_date 
+WHERE titles.emp_no IN (SELECT emp_no FROM titles GROUP BY emp_no HAVING COUNT(emp_no) > 1)
+AND salaries.salary IS NULL GROUP BY titles.emp_no ORDER BY titles.emp_no;
+```
 
-### 2.10 Problem 10, 2 points
+### Problem 10
 
-Find out those pairs of employees (eH, eL) which satisfy ALL following condi-
-tions:
+Find out those pairs of employees (eH, eL) which satisfy ALL following conditions:
 
-1. BotheHandeLborn in 1965
+1. Both eH and eL born in 1965
 
+2. eH’s current salary is higher than eL’s current salary
 
-2.eH’s current salary is higher thaneL’s current salary
+3. eH’s hiring date is greater than eL, which means eH is a newer employee
+than eL.
 
-
-3.eH’s hiring date is greater thaneL, which meanseHis a newer employee
-thaneL.
-
-Sort the result by employee number ofeH then employee number ofel.
-Result is shown as table below:
-
-
-h_empno h_salary h_date l_empno l_salary l_date
-10095 80955 1986-07-15 17206 55078 1986-02-
-10095 80955 1986-07-15 18617 66957 1986-06-
-...
+Sort the result by employee number of eH then employee number of eL.
 
 - hempno :eH’s employee number
 - hsalary :eH’s current salary
@@ -153,52 +168,84 @@ h_empno h_salary h_date l_empno l_salary l_date
 - lsalary :eL’s current salary
 - ldate :eL’s hire date
 
-### 2.11 Problem 11, 2 points
+#### Query
+```
+With tab AS (SELECT employees.emp_no, employees.birth_date, employees.hire_date, salaries.salary, salaries.from_date, salaries.to_date FROM employees
+INNER JOIN salaries ON employees.emp_no = salaries.emp_no AND YEAR(salaries.to_date) = 9999 AND YEAR(birth_date) = 1965)
+SELECT a.emp_no AS h_empno, a.salary AS h_salary, a.hire_date AS h_date, b.emp_no AS l_empno, b.salary AS l_salary, b.hire_date AS l_date
+FROM tab a INNER JOIN tab b ON a.salary > b.salary AND a.hire_date > b.hire_date ORDER BY a.emp_no, b.emp_no;
+```
+
+### Problem 11
 
 Find the employee with highest current salary in each department. Note that
-MAX function is not allowed. Sort the result by department name. Result is
-shown as table below:
+MAX function is not allowed. Sort the result by department name.
 
-dept_name emp_no salary
-Customer Service 18006 144866
-Development 13386 144434
-...
+#### Query
+```
+WITH tab AS
+(SELECT a.dept_name, MIN(-1 * a.salary) * -1 AS salary FROM
+(SELECT departments.dept_name, dept_emp.emp_no, salaries.salary FROM dept_emp 
+INNER JOIN salaries ON dept_emp.emp_no = salaries.emp_no AND dept_emp.to_date = salaries.to_date
+INNER JOIN departments ON dept_emp.dept_no = departments.dept_no
+WHERE YEAR(dept_emp.to_date) = 9999) a
+GROUP BY a.dept_name)
+SELECT tab.dept_name AS dept_name, B.emp_no AS emp_no, tab.salary AS salary FROM tab
+INNER JOIN 
+(SELECT departments.dept_name, dept_emp.emp_no, salaries.salary FROM dept_emp 
+INNER JOIN salaries ON dept_emp.emp_no = salaries.emp_no AND dept_emp.to_date = salaries.to_date
+INNER JOIN departments ON dept_emp.dept_no = departments.dept_no
+WHERE YEAR(dept_emp.to_date) = 9999) as B ON tab.dept_name = B.dept_name AND tab.salary = B.salary
+ORDER BY tab.dept_name;
+```
 
-### 2.12 Problem 12, 2 points
+### Problem 12
 
 Calculate the percentage of number of employees’ current salary is above the
-department current avarage. Sort the result by department name. The result
-is shown as following:
+department current avarage. Sort the result by department name.
 
-dept_name above_avg_pect
-Customer Service 44.
-Development 46.
-...
+#### Query
+```
+WITH tab1 AS # Table with all values
+(SELECT departments.dept_name, salaries.salary FROM dept_emp
+INNER JOIN salaries ON dept_emp.emp_no = salaries.emp_no AND dept_emp.to_date = salaries.to_date
+INNER JOIN departments ON dept_emp.dept_no = departments.dept_no WHERE YEAR(dept_emp.to_date) = 9999),
+tab2 AS #Table with 9 departments and their average 
+(SELECT departments.dept_name, AVG(salaries.salary) AS average FROM dept_emp
+INNER JOIN salaries ON dept_emp.emp_no = salaries.emp_no AND dept_emp.to_date = salaries.to_date
+INNER JOIN departments ON dept_emp.dept_no = departments.dept_no WHERE YEAR(dept_emp.to_date) = 9999
+GROUP BY departments.dept_name),
+tab3 AS # Table with 9 departments and count of salaries greater than average
+(SELECT tab2.dept_name, COUNT(tab2.dept_name) AS cnt1 FROM tab2
+RIGHT JOIN tab1 ON tab2.dept_name = tab1.dept_name AND  tab2.average < tab1.salary WHERE tab2.average IS NOT NULL
+GROUP BY tab2.dept_name),
+tab4 AS # Table with 9 departments and count of all salaries
+(SELECT tab1.dept_name, COUNT(tab1.dept_name) AS cnt2 FROM tab1 GROUP BY tab1.dept_name)
+SELECT tab2.dept_name, (tab3.cnt1/tab4.cnt2)*100 AS above_avg_pect FROM tab2
+INNER JOIN tab3 ON tab2.dept_name = tab3.dept_name INNER JOIN tab4 ON tab2.dept_name = tab4.dept_name
+ORDER BY tab2.dept_name;
+```
 
-As the figure shows, there are 51.9825 % employees in Development department
-has their current salary above the average of current salary in Development
-department.
+### Problem 13
 
-### 2.13 Problem 13, 3 points
-
-Assuming a title is a node and a promotion is an edge between nodes. e.g.
-And promotion from Engineer to Senior Engineer means their is a path from
+Assuming a title is a node and a promotion is an edge between nodes. For example 
+promotion from Engineer to Senior Engineer means their is a path from
 Node ’Engineer’ to Node ’Senior Engineer’. Find out pairs of node of source
 and destination (src, dst) which there is no such path in the database. Sort the
-result by src then dst. The result is shown as following:
+result by src then dst. 
 
+#### Query
+```
+WITH tab AS (SELECT DISTINCT a.title AS src, b.title AS dst FROM titles a, titles b WHERE a.emp_no = b.emp_no AND a.from_date < b.from_date AND a.title != b.title),
+tab1 AS (SELECT DISTINCT a.src, b.dst FROM (SELECT DISTINCT a.src, b.dst FROM tab a, tab b WHERE a.dst = b.src) a, 
+(SELECT DISTINCT a.src, b.dst FROM tab a, tab b WHERE a.dst = b.src) b WHERE a.dst = b.src),
+final AS (SELECT * FROM tab UNION SELECT * FROM tab1),
+temp1 AS (SELECT a.title AS src, b.title AS dst FROM (SELECT DISTINCT src as title FROM tab) a, (SELECT DISTINCT src as title FROM tab) b),
+temp_fin AS (SELECT * From temp1 UNION ALL SELECT * FROM final)
+SELECT src, dst FROM temp_fin GROUP BY src, dst HAVING COUNT(*)= 1 ORDER BY src, dst;
+```
 
-src dst
-Assistant Engineer Assistant Engineer
-Engineer Assistant Engineer
-...
-
-The result table shows that there is no path from Assistant Engineer to Assistant
-Engineer and neither Engineer to Assistant Engineer. That means there is no
-one have been from Engineer and be promoted/demoted to Assistant Engineer
-(no matter how many times of promotion/demotion) in the database.
-
-### 2.14 Problem 14, 3 points
+### Problem 14, 3 points
 
 Continued from problem 13, assumeing we treat the years from beginning of a
 title until promotion as the distance between nodes. e.g. An employee started as
@@ -210,85 +257,19 @@ source node. To simplify the problem, there is no need to consider months and
 date when calculating the distance. Only year is required for calculating the
 distance. Besides, we can assume the distances of any given pair is less than
 100.
-Sort the result by src then dst. The expected result is shown as follow:
+Sort the result by src then dst. 
 
-src dst years
-Assistant Engineer Engineer 7.
-Assistant Engineer Manager 20.
-...
-Engineer Manager 12.
-...
-
-As the table shows, the average distance between node ”Assistant Engineer” and
-node ”Engineer” is 7.7926. We add it with the distance between ”Engineer”
-to ”Manager”, which is 12.7340, to find out the distance between ”Assistant
-Engineer” to ”Manager” is 20.5266.
-
-## 3 Offline Grader
-
-Before downloading and using the offline grader, please pay attention to follow-
-ing points:
-
-1. The grader strictly compares the EXACTLY same result and order men-
-    tioned in each problem statement.
-2. The grader checks DB state on start, make sure the DB state is same as
-    the state which is immediately after importing the employees database.
-
-
-3. The grader takes the query run time into account, you might get partial
-    or no point if the query is running too slow.
-4. The score is unofficial, we will run the grader with your submission after
-    project due date as the official score.
-
-The grader only supports Windows and Mac operating system. After down-
-loading the zip file, follow the instructions according to the platform.
-
-### 3.1 Windows
-
-1. Make sure mysql server is running on localhost.
-2. Decompress the zip file, the result is a directory namedproj2-grader-win
-3. Edit theproj2.cfg, set the user and password for the mysql server connec-
-    tion.
-4. Launch a console such as cmd or powershell, change the working directory
-    toproj2-grader-win
-5. Executeproj2test.exefrom console, the result should be a pass on initial
-    state verification and failed on all questions.
-6. Write your answer in the files inquizdirectory, each question has one file.
-    e.g., writing the answer for problem 1 inq1.sql
-7. Runproj2test.exeagain, grader will show the scores.
-
-### 3.2 Mac OS X
-
-1. Make sure Python 3 is installed at /usr/local/bin/python
-2. Make sure mysql server is running on localhost.
-3. Decompress the zip file, the result is a directory namedproj2test.app
-4. Launch a console, change the working directory toproj2test.app/Contents/Resources.
-5. Edit theproj2.cfg, set the user and password for the mysql server connec-
-    tion.
-6. Change the working directory toproj2test.app/Contents/MacOS
-7. Executeproj2testfrom console, the result should be a pass on initial state
-    verification and failed on all questions.
-8. Write your answer in the files inproj2test.app/Contents/Resources/quiz
-    directory, each question has one file. e.g., writing the answer for problem
-    1 inq1.sql
-9. Runproj2testagain, grader will show the scores.
-
-
-## 4 Submission
-
-Failure to comply with the submission specifications will incur penalties for
-EACH violation.
-
-- What to submit: A zip file has to be submitted through the ‘submitcse460’
-    (if you are CSE460 student) or ‘submitcse560’ (if you are CSE560 stu-
-    dent) submit script by 04/21/2020 11:59PM EST. Only zip extension will
-    be accepted, pleasedon’tuse any other compression methods such as tar
-    or 7zip. You can submit multiple times, note thatonlythe last submission
-    will be kept on the server.
-- Zip file naming: Useubitproj2(NO SPACE!) for the filename, for exam-
-    ple:jsmithproj2.zip, wherejsmithis the ubit of submitter. The project
-    is anINDIVIDUALproject, so everyone needs to submit ONE zip file.
-- Sub-structure of zip file: On unzipping the zip file, there should be a folder
-    named with your ubitubitproj2, under the folderubitproj2, there should
-    be 14 SQL files, starting fromq1.sql,q2.sql... ,q14.sqlwhich correspond
-    to SQL query for each problem.
+#### Query
+```
+WITH tab AS (SELECT * FROM titles WHERE emp_no IN (SELECT emp_no FROM titles GROUP BY emp_no HAVING COUNT(emp_no) >= 1)),
+tab2 AS (SELECT a.title AS src, b.title AS dst, YEAR(b.from_date) - YEAR(a.from_date) + 1 AS years FROM tab a, tab b WHERE a.to_date = b.from_date AND a.emp_no = b.emp_no AND a.title != b.title),
+tab3 AS (SELECT src, dst, AVG(years) AS years FROM tab2 GROUP BY src, dst),
+tab4 AS (SELECT a.src, b.dst, a.years + b.years AS years FROM tab3 a, tab3 b WHERE a.dst = b.src AND a.src != b.dst),
+tab5 AS (SELECT * FROM tab4 UNION ALL SELECT * FROM tab3),
+tab6 AS (SELECT src, dst, MIN(years) AS years FROM tab5 GROUP BY src, dst),
+tab7 AS (SELECT a.src, b.dst, MIN(a.years + b.years) AS years FROM tab6 a, tab4 b WHERE a.dst = b.src AND a.src != b.dst GROUP BY a.src, b.dst),
+final AS (SELECT * FROM tab4 UNION ALL SELECT * FROM tab7),
+final1 AS (SELECT src, dst, MIN(years) FROM final group by src, dst),
+final2 AS (SELECT * FROM tab3 UNION SELECT * FROM final1)
+SELECT src, dst, MIN(years) AS years FROM final2 GROUP BY src, dst ORDER BY src;
+```
