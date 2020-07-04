@@ -1,20 +1,19 @@
 ## CSE 560 Data Models and Query Language
 
-### Company DB - SQL Query
-
+## Company DB - SQL Query
 
 ## 1 Project Setup
 
 ## 1.1 MySQL
 
-This project ONLY use MySQL (version 8.0.13) as the canonical database. To
+This project only use MySQL (version 8.0.13) as the canonical database. To
 download MySQL community server, please go to https://downloads.mysql.com/archives/community/.
 
 ## 1.2 Database: Employees
 
 Follow the steps below to install the project database
 
-1. Download the GitHub Repository:https://github.com/datacharmer/test_db
+1. Download the GitHub Repository: https://github.com/datacharmer/test_db
 2. Launch command line console, change the working directory to your downloaded repository
 3. Type following command:
     `mysql < employees.sql`
@@ -82,9 +81,9 @@ GROUP BY dept_name ORDER BY dept_name;
 
 ### Problem 6
 
-List pairs of employee (e1 , e2 ) which satisfies ALL following conditions:
+List pairs of employee (e1 , e2) which satisfies ALL following conditions:
 
-1. Both e1 and e2 ’s current deparmnet number is d001.
+1. Both e1 and e2’s current deparmnet number is d001.
 2. The year of birthdate for e1 and e2 is 1955.
 3. The e1’s employee number is less than e2.
 
@@ -163,12 +162,12 @@ than eL.
 
 Sort the result by employee number of eH then employee number of eL.
 
-- hempno :eH’s employee number
-- hsalary :eH’s current salary
-- hdate :eH’s hire date
-- lempno :eL’s employee number
-- lsalary :eL’s current salary
-- ldate :eL’s hire date
+- hempno: eH’s employee number
+- hsalary: eH’s current salary
+- hdate: eH’s hire date
+- lempno: eL’s employee number
+- lsalary: eL’s current salary
+- ldate: eL’s hire date
 
 #### Query
 ```
