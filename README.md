@@ -2,6 +2,7 @@
 
 ### Company DB - SQL Query
 
+
 ## 1 Project Setup
 
 ## 1.1 MySQL
