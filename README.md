@@ -46,10 +46,8 @@ Find all employees’ last name with their salaries in different periods. Sort t
 result by last name, salary, fromdate, then todate.
 
 #### Query
-`SELECT employees.last_name, salaries.salary, salaries.from_date, salaries.to_date 
-
+`SELECT employees.last_name, salaries.salary, salaries.from_date, salaries.to_date
 FROM employees INNER JOIN salaries ON employees.emp_no = salaries.emp_no
-
 ORDER BY last_name, salary, from_date, to_date;`
 
 ### Problem 4
@@ -58,40 +56,37 @@ Find all employees’ current department and the start date with their employee
 number and sort the result by employee number.
 
 #### Query
-`SELECT employees.emp_no, departments.dept_name, dept_emp.from_date FROM employees 
+```
+SELECT employees.emp_no, departments.dept_name, dept_emp.from_date FROM employees 
 INNER JOIN dept_emp ON employees.emp_no = dept_emp.emp_no
 INNER JOIN departments ON dept_emp.dept_no = departments.dept_no
 WHERE YEAR(dept_emp.to_date) = 9999
-ORDER BY emp_no;`
+ORDER BY emp_no;
+```
 
-### 2.5 Problem 5, 1 point
+### Problem 5
 
 List the number of employees in each department. Sort the result by department
-name. The result of query is similar to following table:
+name.
 
-dept_name noe
-Customer Service 23580
-Development 85707
-...
+#### Query
+`SELECT departments.dept_name, COUNT(departments.dept_name) as noe FROM dept_emp
+INNER JOIN departments ON dept_emp.dept_no = departments.dept_no
+GROUP BY dept_name
+ORDER BY dept_name;`
 
-### 2.6 Problem 6, 2 points
+### Problem 6
 
-List pairs of employee (e 1 , e 2 ) which satisfies ALL following conditions:
+List pairs of employee (e1 , e2 ) which satisfies ALL following conditions:
 
-1. Bothe 1 ande 2 ’s current deparmnet number is d001.
-2. The year of birthdate fore 1 ande 2 is 1955.
-3. Thee 1 ’s employee number is less thane 2.
+1. Both e1 and e2 ’s current deparmnet number is d001.
+2. The year of birthdate for e1 and e2 is 1955.
+3. The e1’s employee number is less than e2.
 
-Sort the result bye 1 thene 2. The result of query is similar to following table:
+Sort the result by e1 then e2.
 
-e1 e
-10239 10367
-10239 11251
-...
-10367 11251
-10367 11554
-...
-
+#### Query
+``
 
 ### 2.7 Problem 7, 2 points
 
