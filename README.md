@@ -1,4 +1,5 @@
 ## CSE 560 Data Models and Query Language
+
 ### Company DB - SQL Query
 
 ## 1 Project Setup
@@ -245,7 +246,7 @@ temp_fin AS (SELECT * From temp1 UNION ALL SELECT * FROM final)
 SELECT src, dst FROM temp_fin GROUP BY src, dst HAVING COUNT(*)= 1 ORDER BY src, dst;
 ```
 
-### Problem 14, 3 points
+### Problem 14
 
 Continued from problem 13, assumeing we treat the years from beginning of a
 title until promotion as the distance between nodes. e.g. An employee started as
